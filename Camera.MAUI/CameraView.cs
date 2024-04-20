@@ -468,8 +468,9 @@ public class CameraView : View, ICameraView
     /// <paramref name="Resolution"/> Sets the Video Resolution. It must be in Camera.AvailableResolutions. If width or height is 0, max resolution will be taken.
     /// <paramref name="frameRate"/> Desired frame rate of the recording in Hz (default: 30). Only supported on Android.
     /// <paramref name="bitRate"/> Desired bitrate of the recording in bps (default: 10M). Only supported on Android.
+    /// <paramref name="withAudio"/> Record with audio (default: true).
     /// </summary>
-    public async Task<CameraResult> StartRecordingAsync(string file, Size Resolution = default, int frameRate = 30, int bitRate = 10000000)
+    public async Task<CameraResult> StartRecordingAsync(string file, Size Resolution = default, int frameRate = 30, int bitRate = 10000000, bool withAudio = true)
     {
         CameraResult result = CameraResult.AccessError;
         if (Camera != null)
@@ -481,7 +482,7 @@ public class CameraView : View, ICameraView
             }
             if (Handler != null && Handler is CameraViewHandler handler)
             {
-                result = await handler.StartRecordingAsync(file, Resolution, frameRate, bitRate);
+                result = await handler.StartRecordingAsync(file, Resolution, frameRate, bitRate, withAudio);
                 if (result == CameraResult.Success)
                 {
                     BarCodeResults = null;

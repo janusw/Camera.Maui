@@ -113,7 +113,7 @@ internal class MauiCameraView : UIView, IAVCaptureVideoDataOutputSampleBufferDel
             }
         }
     }
-    public async Task<CameraResult> StartRecordingAsync(string file, Size Resolution, int frameRate, int bitRate)
+    public async Task<CameraResult> StartRecordingAsync(string file, Size Resolution, int frameRate, int bitRate, bool withAudio)
     {
         CameraResult result = CameraResult.Success;
         if (initiated)
@@ -121,7 +121,7 @@ internal class MauiCameraView : UIView, IAVCaptureVideoDataOutputSampleBufferDel
             if (started) StopCamera();
             if (await CameraView.RequestPermissions(true))
             {
-                if (cameraView.Camera != null && cameraView.Microphone != null && captureSession != null)
+                if (cameraView.Camera != null && captureSession != null)
                 {
                     try
                     {
@@ -138,9 +138,12 @@ internal class MauiCameraView : UIView, IAVCaptureVideoDataOutputSampleBufferDel
                         ForceAutoFocus();
                         captureInput = new AVCaptureDeviceInput(captureDevice, out var err);
                         captureSession.AddInput(captureInput);
-                        micDevice = micDevices.First(d => d.UniqueID == cameraView.Microphone.DeviceId);
-                        micInput = new AVCaptureDeviceInput(micDevice, out err);
-                        captureSession.AddInput(micInput);
+                        if (withAudio && cameraView.Microphone != null)
+                        {
+                            micDevice = micDevices.First(d => d.UniqueID == cameraView.Microphone.DeviceId);
+                            micInput = new AVCaptureDeviceInput(micDevice, out err);
+                            captureSession.AddInput(micInput);
+                        }
 
                         captureSession.AddOutput(videoDataOutput);
                         recordOutput = new AVCaptureMovieFileOutput();

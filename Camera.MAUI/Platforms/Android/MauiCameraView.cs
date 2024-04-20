@@ -146,7 +146,7 @@ internal class MauiCameraView: GridLayout
         }
     }
 
-    internal async Task<CameraResult> StartRecordingAsync(string file, Microsoft.Maui.Graphics.Size Resolution, int frameRate, int bitRate)
+    internal async Task<CameraResult> StartRecordingAsync(string file, Microsoft.Maui.Graphics.Size Resolution, int frameRate, int bitRate, bool withAudio)
     {
         var result = CameraResult.Success;
         if (initiated && !recording)
@@ -173,8 +173,11 @@ internal class MauiCameraView: GridLayout
                             mediaRecorder = new MediaRecorder(context);
                         else
                             mediaRecorder = new MediaRecorder();
-                        audioManager.Mode = Mode.Normal;
-                        mediaRecorder.SetAudioSource(AudioSource.Mic);
+                        if (withAudio)
+                        {
+                            audioManager.Mode = Mode.Normal;
+                            mediaRecorder.SetAudioSource(AudioSource.Mic);
+                        }
                         mediaRecorder.SetVideoSource(VideoSource.Surface);
                         var ext = System.IO.Path.GetExtension(file).ToLower();
                         switch (ext)
@@ -182,17 +185,20 @@ internal class MauiCameraView: GridLayout
                             case ".3gp":
                                 mediaRecorder.SetOutputFormat(OutputFormat.ThreeGpp);
                                 mediaRecorder.SetVideoEncoder(VideoEncoder.H264);
-                                mediaRecorder.SetAudioEncoder(AudioEncoder.Aac);
+                                if (withAudio)
+                                    mediaRecorder.SetAudioEncoder(AudioEncoder.Aac);
                                 break;
                             case ".mp4":
                                 mediaRecorder.SetOutputFormat(OutputFormat.Mpeg4);
                                 mediaRecorder.SetVideoEncoder(VideoEncoder.H264);
-                                mediaRecorder.SetAudioEncoder(AudioEncoder.Aac);
+                                if (withAudio)
+                                    mediaRecorder.SetAudioEncoder(AudioEncoder.Aac);
                                 break;
                             case ".webm":
                                 mediaRecorder.SetOutputFormat(OutputFormat.Webm);
                                 mediaRecorder.SetVideoEncoder(VideoEncoder.Vp8);
-                                mediaRecorder.SetAudioEncoder(AudioEncoder.Vorbis);
+                                if (withAudio)
+                                    mediaRecorder.SetAudioEncoder(AudioEncoder.Vorbis);
                                 break;
                             default:
                                 throw new ArgumentException($"Invalid file extension '{ext}'! Please use '.3gp', '.mp4' or '.webm'!");
