@@ -194,7 +194,12 @@ public sealed partial class MauiCameraView : UserControl, IDisposable
                         MemoryPreference = MediaCaptureMemoryPreference.Cpu
                     };
                     if (withAudio && cameraView.Microphone != null)
+                    {
+                        mcis.StreamingCaptureMode = StreamingCaptureMode.AudioAndVideo;
                         mcis.AudioDeviceId = cameraView.Microphone.DeviceId;
+                    }
+                    else
+                        mcis.StreamingCaptureMode = StreamingCaptureMode.Video;
                     await mediaCapture.InitializeAsync(mcis);
 
                     MediaEncodingProfile profile = MediaEncodingProfile.CreateMp4(VideoEncodingQuality.Auto);
