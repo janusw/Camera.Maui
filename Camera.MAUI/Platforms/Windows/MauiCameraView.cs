@@ -173,14 +173,14 @@ public sealed partial class MauiCameraView : UserControl, IDisposable
             }
         }
     }
-    internal async Task<CameraResult> StartRecordingAsync(string file, Size Resolution, int frameRate, int bitRate)
+    internal async Task<CameraResult> StartRecordingAsync(string file, Size Resolution, int frameRate, int bitRate, bool withAudio)
     {
         CameraResult result = CameraResult.Success;
 
         if (initiated)
         {
             if (started) await StopCameraAsync();
-            if (cameraView.Camera != null && cameraView.Microphone != null)
+            if (cameraView.Camera != null)
             {
                 while (!mediaLoaded) await Task.Delay(50);
                 started = true;
@@ -188,12 +188,19 @@ public sealed partial class MauiCameraView : UserControl, IDisposable
                 mediaCapture = new MediaCapture();
                 try
                 {
-                    await mediaCapture.InitializeAsync(new MediaCaptureInitializationSettings
+                    var mcis = new MediaCaptureInitializationSettings
                     {
                         VideoDeviceId = cameraView.Camera.DeviceId,
-                        MemoryPreference = MediaCaptureMemoryPreference.Cpu,
-                        AudioDeviceId = cameraView.Microphone.DeviceId
-                    });
+                        MemoryPreference = MediaCaptureMemoryPreference.Cpu
+                    };
+                    if (withAudio && cameraView.Microphone != null)
+                    {
+                        mcis.StreamingCaptureMode = StreamingCaptureMode.AudioAndVideo;
+                        mcis.AudioDeviceId = cameraView.Microphone.DeviceId;
+                    }
+                    else
+                        mcis.StreamingCaptureMode = StreamingCaptureMode.Video;
+                    await mediaCapture.InitializeAsync(mcis);
 
                     MediaEncodingProfile profile = MediaEncodingProfile.CreateMp4(VideoEncodingQuality.Auto);
                     recordStream = new(file, FileMode.Create);
